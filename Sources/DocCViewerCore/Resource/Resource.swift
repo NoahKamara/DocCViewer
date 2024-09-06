@@ -1,5 +1,6 @@
 //
 //  Resource.swift
+// DocCViewer
 //
 //  Copyright © 2024 Noah Kamara.
 //

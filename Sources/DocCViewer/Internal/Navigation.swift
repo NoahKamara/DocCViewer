@@ -1,5 +1,6 @@
 //
 //  Navigation.swift
+// DocCViewer
 //
 //  Copyright © 2024 Noah Kamara.
 //
@@ -30,6 +31,5 @@ extension DocumentationSchemeHandler: WKNavigationDelegate {
         return .allow
     }
 
-    public func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
-    }
+    public func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {}
 }

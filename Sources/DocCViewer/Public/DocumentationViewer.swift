@@ -1,5 +1,6 @@
 //
 //  DocumentationViewer.swift
+// DocCViewer
 //
 //  Copyright © 2024 Noah Kamara.
 //
@@ -44,12 +45,11 @@ public class DocumentationViewer {
         }
     }
 
-
     @MainActor
     public func load(_ url: TopicURL) {
         logger.debug("loading \(url.url)")
         withCoordinator { coordinator in
-//            coordinator.view?.url = 
+//            coordinator.view?.url =
             coordinator.view?.load(URLRequest(url: url.url))
         }
     }

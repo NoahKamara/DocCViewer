@@ -1,5 +1,6 @@
 //
 //  DocumentationView.swift
+// DocCViewer
 //
 //  Copyright © 2024 Noah Kamara.
 //
@@ -45,8 +46,7 @@ public struct DocumentationView {
     }
 
     @MainActor
-    func updateView(_ nsView: WKWebView, context: Context) {
-    }
+    func updateView(_ nsView: WKWebView, context: Context) {}
 }
 
 public extension URL {

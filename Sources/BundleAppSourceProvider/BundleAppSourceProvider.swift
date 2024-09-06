@@ -1,5 +1,6 @@
 //
-//  BuiltInStaticAppSourceProvider.swift
+//  BundleAppSourceProvider.swift
+// DocCViewer
 //
 //  Copyright © 2024 Noah Kamara.
 //
@@ -40,6 +41,6 @@ public struct BundleAppSourceProvider: ResourceProvider {
     }
 
     public func provideSource(_ kind: AppSourceKind, at path: String) async throws -> Data {
-        return try resource(at: path)
+        try resource(at: path)
     }
 }
