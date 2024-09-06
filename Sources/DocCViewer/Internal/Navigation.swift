@@ -1,8 +1,7 @@
 //
-//  File.swift
-//  DocCViewer
+//  Navigation.swift
 //
-//  Created by Noah Kamara on 06.09.24.
+//  Copyright © 2024 Noah Kamara.
 //
 
 import Foundation

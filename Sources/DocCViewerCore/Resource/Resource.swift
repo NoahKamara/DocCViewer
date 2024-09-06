@@ -1,3 +1,9 @@
+//
+//  Resource.swift
+//
+//  Copyright © 2024 Noah Kamara.
+//
+
 import Foundation
 import UniformTypeIdentifiers
 

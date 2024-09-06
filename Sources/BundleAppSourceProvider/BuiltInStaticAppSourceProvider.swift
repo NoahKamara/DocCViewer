@@ -1,3 +1,9 @@
+//
+//  BuiltInStaticAppSourceProvider.swift
+//
+//  Copyright © 2024 Noah Kamara.
+//
+
 import DocCViewerCore
 import Foundation
 

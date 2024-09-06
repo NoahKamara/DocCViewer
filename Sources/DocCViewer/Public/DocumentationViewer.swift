@@ -1,3 +1,9 @@
+//
+//  DocumentationViewer.swift
+//
+//  Copyright © 2024 Noah Kamara.
+//
+
 @_exported import DocCViewerCore
 import Foundation
 import Observation

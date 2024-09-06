@@ -1,3 +1,9 @@
+//
+//  DocumentationSchemeHandler.swift
+//
+//  Copyright © 2024 Noah Kamara.
+//
+
 import DocCViewerCore
 import OSLog
 import SwiftUI
@@ -18,6 +24,7 @@ class DocumentationSchemeHandler: NSObject {
 }
 
 // MARK: URLSchemeHandler
+
 extension DocumentationSchemeHandler: WKURLSchemeHandler {
     func webView(_ webView: WKWebView, start urlSchemeTask: any WKURLSchemeTask) {
         guard let url = urlSchemeTask.request.url else {

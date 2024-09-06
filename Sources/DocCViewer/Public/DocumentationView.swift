@@ -1,11 +1,12 @@
-// The Swift Programming Language
-// https://docs.swift.org/swift-book
+//
+//  DocumentationView.swift
+//
+//  Copyright © 2024 Noah Kamara.
+//
 
 import OSLog
 import SwiftUI
 import WebKit
-
-
 
 public struct DocumentationView {
     public class Coordinator {
@@ -55,6 +56,7 @@ public extension URL {
 #if os(macOS)
 
 // MARK: View (macOS)
+
 extension DocumentationView: NSViewRepresentable {
     public func makeNSView(context: Context) -> WKWebView {
         makeView(context: context)
@@ -67,6 +69,7 @@ extension DocumentationView: NSViewRepresentable {
 #else
 
 // MARK: View (iOS)
+
 extension DocumentationViewer: UIViewRepresentable {
     public func makeUIView(context: Context) -> WKWebView {
         makeView(context: context)
