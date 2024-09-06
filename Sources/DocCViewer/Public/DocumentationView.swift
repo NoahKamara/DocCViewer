@@ -70,7 +70,7 @@ extension DocumentationView: NSViewRepresentable {
 
 // MARK: View (iOS)
 
-extension DocumentationViewer: UIViewRepresentable {
+extension DocumentationView: UIViewRepresentable {
     public func makeUIView(context: Context) -> WKWebView {
         makeView(context: context)
     }
