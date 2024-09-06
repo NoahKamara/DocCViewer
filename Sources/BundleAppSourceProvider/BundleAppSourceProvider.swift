@@ -40,7 +40,6 @@ public struct BundleAppSourceProvider: ResourceProvider {
     }
 
     public func provideSource(_ kind: AppSourceKind, at path: String) async throws -> Data {
-        print(path)
         return try resource(at: path)
     }
 }

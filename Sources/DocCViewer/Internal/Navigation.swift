@@ -31,6 +31,5 @@ extension DocumentationSchemeHandler: WKNavigationDelegate {
     }
 
     public func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
-        print("didStart", navigation)
     }
 }

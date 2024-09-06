@@ -44,10 +44,12 @@ public class DocumentationViewer {
         }
     }
 
+
     @MainActor
     public func load(_ url: TopicURL) {
-        logger.info("loading \(url.url)")
+        logger.debug("loading \(url.url)")
         withCoordinator { coordinator in
+//            coordinator.view?.url = 
             coordinator.view?.load(URLRequest(url: url.url))
         }
     }

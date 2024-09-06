@@ -31,6 +31,7 @@ public struct DocumentationView {
 
     @MainActor
     func makeView(context: Context) -> WKWebView {
+        print("MAKE")
         let config = WKWebViewConfiguration()
         config.setURLSchemeHandler(viewer.schemaHandler, forURLScheme: "doc")
         config.preferences.javaScriptCanOpenWindowsAutomatically = true
@@ -39,13 +40,12 @@ public struct DocumentationView {
         context.coordinator.view = view
         viewer.register(context.coordinator)
         view.isInspectable = true
-        view.loadHTMLString("<h1>Hello, World!</h1>", baseURL: .doc)
+        view.load(URLRequest(url: URL(string: "doc://index.html")!))
         return view
     }
 
     @MainActor
     func updateView(_ nsView: WKWebView, context: Context) {
-        print("UPDATE")
     }
 }
 

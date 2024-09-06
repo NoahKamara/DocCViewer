@@ -45,7 +45,7 @@ extension DocumentationSchemeHandler: WKURLSchemeHandler {
 
     @MainActor
     func webView(_ webView: WKWebView, stop urlSchemeTask: any WKURLSchemeTask) {
-        logger.info("cancelling task \(urlSchemeTask.request)")
+        logger.debug("cancelling task \(urlSchemeTask.request)")
         tasks[urlSchemeTask.request]?.cancel()
     }
 
@@ -54,7 +54,6 @@ extension DocumentationSchemeHandler: WKURLSchemeHandler {
             logger.warning("[GET] \(url): Not a resource URL")
             return (Data(), HTTPURLResponse(url: url, statusCode: 404, httpVersion: nil, headerFields: nil)!)
         }
-        print(resource, url)
 
         do {
             let responseType = UTType(filenameExtension: url.pathExtension)?.preferredMIMEType ?? "text/html"
@@ -67,7 +66,7 @@ extension DocumentationSchemeHandler: WKURLSchemeHandler {
                 textEncodingName: "utf-8"
             )
 
-            logger.info("[GET] \(url): provided \(resourceData.count, format: .byteCount) of '\(responseType)'")
+            logger.debug("[GET] \(url): provided \(resourceData.count, format: .byteCount) of '\(responseType)'")
             return (resourceData, urlResponse)
         } catch {
             logger.error("[GET] \(url) failed to load with error: \(error)")

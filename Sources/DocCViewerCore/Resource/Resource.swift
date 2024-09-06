@@ -14,7 +14,6 @@ public enum Resource {
 
     public init?(url: URL) {
         guard let bundleId = url.host() else {
-            print("no host")
             return nil
         }
 
@@ -41,6 +40,8 @@ public enum Resource {
             self = .appSource(.init(kind: .js, path: url.path()))
 //        case "theme-settings.json":
 //            self = .bundleAsset(.init(bundleIdentifier: bundleID, kind: , path: url.path()))
+        case nil:
+            self = .appSource(.init(kind: .index, path: "index.html"))
         default:
             return nil
         }
