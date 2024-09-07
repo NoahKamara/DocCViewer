@@ -25,6 +25,8 @@ public enum Resource {
             self = .bundleAsset(.init(bundleIdentifier: bundleId, kind: .download, path: url.path()))
         case "images":
             self = .bundleAsset(.init(bundleIdentifier: bundleId, kind: .image, path: url.path()))
+        case "videos":
+            self = .bundleAsset(.init(bundleIdentifier: bundleId, kind: .video, path: url.path()))
         case "index":
             self = .bundleAsset(.init(bundleIdentifier: bundleId, kind: .index, path: url.path()))
         case "documentation":
@@ -88,6 +90,7 @@ public struct BundleAsset {
 public enum BundleAssetKind {
     case download
     case image
+    case video
     case index
     case data
     case documentation
