@@ -40,6 +40,7 @@ public struct DocumentationView {
         let view = WKWebView(frame: .zero, configuration: config)
         context.coordinator.view = view
         viewer.register(context.coordinator)
+
         view.isInspectable = true
         view.load(URLRequest(url: URL(string: "doc://index.html")!))
         return view
