@@ -29,7 +29,7 @@ public enum Resource {
             self = .bundleAsset(.init(bundleIdentifier: bundleId, kind: .index, path: url.path()))
         case "documentation":
             self = .bundleAsset(.init(bundleIdentifier: bundleId, kind: .documentation, path: url.path()))
-        case "tutorial":
+        case "tutorials":
             self = .bundleAsset(.init(bundleIdentifier: bundleId, kind: .tutorial, path: url.path()))
         case "data":
             self = .bundleAsset(.init(bundleIdentifier: bundleId, kind: .data, path: url.path()))
