@@ -10,10 +10,12 @@ import Foundation
 import Observation
 import OSLog
 
+
 @Observable
 public class DocumentationViewer {
     let logger = Logger.doccviewer("Viewer")
     let schemaHandler: DocumentationSchemeHandler
+    public let bridge: Bridge = Bridge()
     private var coordinator: DocumentationView.Coordinator?
 
     public init(provider: ResourceProvider) {
@@ -33,24 +35,30 @@ public class DocumentationViewer {
 
     @MainActor
     public func goBack() {
-        withCoordinator { coordinator in
-            coordinator.view?.goBack()
-        }
+        coordinator?.view?.goBack()
     }
 
     @MainActor
     public func goForward() {
-        withCoordinator { coordinator in
-            coordinator.view?.goForward()
-        }
+        coordinator?.view?.goForward()
     }
 
     @MainActor
-    public func load(_ url: TopicURL) {
-        logger.debug("loading \(url.url)")
-        withCoordinator { coordinator in
-//            coordinator.view?.url =
-            coordinator.view?.load(URLRequest(url: url.url))
+    public func navigate(to topicUrl: TopicURL) {
+        logger.debug("navigating to \(topicUrl.url)")
+
+        guard
+            let currentUrl = coordinator?.view?.url,
+            let currentBundleId = currentUrl.host ?? currentUrl.pathComponents.first
+        else {
+            logger.debug("attempt full page navigation to \(topicUrl.url)")
+            coordinator?.view?.load(.init(url: topicUrl.url))
+            return
+        }
+        
+        Task {
+            logger.debug("attempting dynamic navigation to \(topicUrl.url)")
+            try await bridge.send(.navigation, data: topicUrl.path)
         }
     }
 

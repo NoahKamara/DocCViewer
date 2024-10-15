@@ -14,7 +14,8 @@ public struct DocumentationView {
         let viewer: DocumentationViewer
         var view: WKWebView?
 
-        @MainActor init(viewer: DocumentationViewer) {
+        @MainActor
+        init(viewer: DocumentationViewer) {
             self.viewer = viewer
         }
     }
@@ -37,12 +38,18 @@ public struct DocumentationView {
         config.setURLSchemeHandler(viewer.schemaHandler, forURLScheme: "doc")
         config.preferences.javaScriptCanOpenWindowsAutomatically = true
 
+        let contentController = WKUserContentController()
+        let communicationBackend = WebKitBackend(delegate: context.coordinator.viewer.bridge)
+        contentController.add(communicationBackend, name: "bridge")
+        config.userContentController = contentController
+        
         let view = WKWebView(frame: .zero, configuration: config)
         context.coordinator.view = view
+        context.coordinator.viewer.bridge.backend = communicationBackend
+        communicationBackend.webView = view
         viewer.register(context.coordinator)
 
         view.isInspectable = true
-        view.load(URLRequest(url: URL(string: "doc://index.html")!))
         return view
     }
 
