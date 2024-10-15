@@ -1,4 +1,4 @@
---header \n {file}\nDocCViewer\n\n Copyright © {created.year} {author.name}.\n
+--header \n {file}\n DocCViewer\n\n Copyright © 2024 Noah Kamara.\n
 
 --swiftVersion 6
 --acronyms ID,URL,UUID

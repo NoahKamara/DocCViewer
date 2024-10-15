@@ -1,6 +1,6 @@
 //
 //  DocumentationViewer.swift
-// DocCViewer
+//  DocCViewer
 //
 //  Copyright © 2024 Noah Kamara.
 //
@@ -10,12 +10,11 @@ import Foundation
 import Observation
 import OSLog
 
-
 @Observable
 public class DocumentationViewer {
     let logger = Logger.doccviewer("Viewer")
     let schemaHandler: DocumentationSchemeHandler
-    public let bridge: Bridge = Bridge()
+    public let bridge: Bridge = .init()
     private var coordinator: DocumentationView.Coordinator?
 
     public init(provider: ResourceProvider) {
@@ -55,7 +54,7 @@ public class DocumentationViewer {
             coordinator?.view?.load(.init(url: topicUrl.url))
             return
         }
-        
+
         Task {
             logger.debug("attempting dynamic navigation to \(topicUrl.url)")
             try await bridge.send(.navigation, data: topicUrl.path)

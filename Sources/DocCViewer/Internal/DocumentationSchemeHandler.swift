@@ -1,6 +1,6 @@
 //
 //  DocumentationSchemeHandler.swift
-// DocCViewer
+//  DocCViewer
 //
 //  Copyright © 2024 Noah Kamara.
 //

@@ -1,6 +1,6 @@
 //
 //  DocumentationView.swift
-// DocCViewer
+//  DocCViewer
 //
 //  Copyright © 2024 Noah Kamara.
 //
@@ -42,7 +42,7 @@ public struct DocumentationView {
         let communicationBackend = WebKitBackend(delegate: context.coordinator.viewer.bridge)
         contentController.add(communicationBackend, name: "bridge")
         config.userContentController = contentController
-        
+
         let view = WKWebView(frame: .zero, configuration: config)
         context.coordinator.view = view
         context.coordinator.viewer.bridge.backend = communicationBackend
