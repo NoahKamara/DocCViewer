@@ -34,9 +34,10 @@ extension DocumentationSchemeHandler: WKURLSchemeHandler {
             return
         }
 
-        tasks[urlSchemeTask.request] = Task { @MainActor in
+        tasks[urlSchemeTask.request] = Task {
             let (data, response) = await loadResource(at: url)
             await MainActor.run {
+                guard tasks[urlSchemeTask.request] != nil else { return }
                 urlSchemeTask.didReceive(response)
                 urlSchemeTask.didReceive(data)
                 urlSchemeTask.didFinish()
@@ -48,6 +49,7 @@ extension DocumentationSchemeHandler: WKURLSchemeHandler {
     func webView(_ webView: WKWebView, stop urlSchemeTask: any WKURLSchemeTask) {
         logger.debug("cancelling task \(urlSchemeTask.request)")
         tasks[urlSchemeTask.request]?.cancel()
+        tasks[urlSchemeTask.request] = nil
     }
 
     private func loadResource(at url: URL) async -> (Data, URLResponse) {
