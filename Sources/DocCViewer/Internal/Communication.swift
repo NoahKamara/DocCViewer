@@ -19,8 +19,6 @@ public struct EventType: Hashable, Sendable, Equatable, Codable, CustomStringCon
         self.rawValue = rawValue
     }
 
-    static let navigation = EventType("navigation")
-
     public func encode(to encoder: any Encoder) throws {
         try rawValue.encode(to: encoder)
     }
@@ -32,6 +30,18 @@ public struct EventType: Hashable, Sendable, Equatable, Codable, CustomStringCon
     public init(from decoder: any Decoder) throws {
         try self.init(String(from: decoder))
     }
+}
+
+// MARK: Default Events
+public extension EventType {
+    /// an event that can be sent to the viewer to trigger navigation to a new topic
+    /// > data should be a url that has a shared base with the current url
+    /// > (in most cases this means the new url must be in the same bundle)
+    static let navigation = EventType("navigation")
+    
+    /// an event sent by the viewer after navigating to a page
+    /// > data is the current page URL
+    static let didNavigate = EventType("didNavigate")
 }
 
 // struct Event<T: Codable>: RawRepresentable {
@@ -68,7 +78,7 @@ package protocol CommunicationBackend {
     func send<T: Encodable>(_ type: EventType, data: T) async throws
 }
 
-actor AsyncChannel {
+public actor AsyncChannel {
     private var listeners: [UUID: AsyncStream<Data>.Continuation] = [:]
 
     var isEmpty: Bool { listeners.isEmpty }
@@ -79,7 +89,7 @@ actor AsyncChannel {
         }
     }
 
-    func values() -> AsyncStream<Data> {
+    public func values() -> AsyncStream<Data> {
         let identifier = UUID()
 
         return AsyncStream { continuation in
@@ -93,51 +103,16 @@ actor AsyncChannel {
         }
     }
 
-    private func removeListener(withId id: UUID) {
-        listeners[id] = nil
-    }
-}
-
-public class CommunicationBridge: CommunicationDelegate {
-    static let logger = Logger.doccviewer("CommunicationBridge")
-
-    package var backend: CommunicationBackend? = nil
-    private var channels: [EventType: AsyncChannel] = [:]
-
-    init() {}
-
-    package func emit(_ type: EventType, data: Data) {
-        Self.logger.info("emitted '\(type)'")
-
-        guard let channel = channels[type] else {
-            Self.logger.debug("no one is listening for '\(type)' with \(String(data: data, encoding: .utf8) ?? "")")
-            return
-        }
-
-        Task {
-            await channel.emit(data)
-        }
-    }
-
-    func on<T: Decodable>(_ type: EventType, of: T.Type) async -> some AsyncSequence<T, any Error> {
-        let values = await createOrGetChannel(for: type).values()
-
-        let decoder = JSONDecoder()
-
-        return values.map { data in
+    
+    public func values<T: Decodable & Sendable>(as type: T.Type, decoder: JSONDecoder = JSONDecoder()) -> some AsyncSequence<T, any Error> {
+        self.values().map { data in
             try decoder.decode(T.self, from: data)
         }
     }
-
-//    func send()
-    private func createOrGetChannel(for type: EventType) -> AsyncChannel {
-        if let existing = channels[type] {
-            return existing
-        }
-
-        let new = AsyncChannel()
-        channels[type] = new
-        return new
+    
+    
+    private func removeListener(withId id: UUID) {
+        listeners[id] = nil
     }
 }
 
@@ -147,7 +122,7 @@ import WebKit
 public class WebKitBackend: NSObject, CommunicationBackend {
     static let logger = Logger.doccviewer("WebKitBackend")
     package var delegate: CommunicationDelegate
-    weak var webView: WKWebView? = nil
+    private weak var webView: WKWebView? = nil
 
     init(delegate: CommunicationDelegate) {
         self.delegate = delegate
@@ -155,6 +130,29 @@ public class WebKitBackend: NSObject, CommunicationBackend {
         self.delegate.backend = self
     }
 
+    @MainActor
+    func register(on webView: WKWebView) {
+        self.webView = webView
+        
+        // observe navigation changes
+        let didNavigateScript = """
+        (function() {
+            let lastUrl = window.location.href;
+            new MutationObserver(() => {
+                const url = window.location.href;
+                if (url !== lastUrl) {
+                    lastUrl = url;
+                    console.debug("didNavigate")
+                    window.bridge.send({type: "didNavigate", data: url});
+                }
+            }).observe(document, {subtree: true, childList: true});
+        })();
+        """
+
+        let userScript = WKUserScript(source: didNavigateScript, injectionTime: .atDocumentEnd, forMainFrameOnly: false)
+        webView.configuration.userContentController.addUserScript(userScript)
+    }
+    
     package func send(_ type: EventType, data: some Encodable) async throws {
         guard let webView else {
             Self.logger.error("send called before webView was registered")
@@ -181,7 +179,7 @@ extension WebKitBackend: WKScriptMessageHandler {
 
         if let eventData = event["data"] {
             do {
-                let jsonData = try JSONSerialization.data(withJSONObject: eventData)
+                let jsonData = try JSONSerialization.data(withJSONObject: eventData, options: [.fragmentsAllowed])
                 delegate.emit(.init(type), data: jsonData)
             } catch {
                 Self.logger.error("failed to deserialize message for event '\(type)': \(message)")

@@ -28,14 +28,8 @@ public extension DocumentationViewer {
             }
         }
 
-        func on<T: Decodable>(_ type: EventType, of: T.Type) async -> some AsyncSequence<T, any Error> {
-            let values = await createOrGetChannel(for: type).values()
-
-            let decoder = JSONDecoder()
-
-            return values.map { data in
-                try decoder.decode(T.self, from: data)
-            }
+        public func channel(for type: EventType) -> AsyncChannel {
+            createOrGetChannel(for: type)
         }
 
         private func createOrGetChannel(for type: EventType) -> AsyncChannel {
@@ -48,7 +42,7 @@ public extension DocumentationViewer {
             return new
         }
 
-        func send(_ type: EventType, data: some Encodable) async throws {
+        public func send(_ type: EventType, data: some Encodable) async throws {
             guard let backend else {
                 Self.logger.warning("backend not attached. cannot send")
                 return

@@ -46,7 +46,7 @@ public struct DocumentationView {
         let view = WKWebView(frame: .zero, configuration: config)
         context.coordinator.view = view
         context.coordinator.viewer.bridge.backend = communicationBackend
-        communicationBackend.webView = view
+        communicationBackend.register(on: view)
         viewer.register(context.coordinator)
 
         view.isInspectable = true
