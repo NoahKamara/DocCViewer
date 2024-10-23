@@ -33,12 +33,13 @@ public struct EventType: Hashable, Sendable, Equatable, Codable, CustomStringCon
 }
 
 // MARK: Default Events
+
 public extension EventType {
     /// an event that can be sent to the viewer to trigger navigation to a new topic
     /// > data should be a url that has a shared base with the current url
     /// > (in most cases this means the new url must be in the same bundle)
     static let navigation = EventType("navigation")
-    
+
     /// an event sent by the viewer after navigating to a page
     /// > data is the current page URL
     static let didNavigate = EventType("didNavigate")
@@ -103,14 +104,12 @@ public actor AsyncChannel {
         }
     }
 
-    
     public func values<T: Decodable & Sendable>(as type: T.Type, decoder: JSONDecoder = JSONDecoder()) -> some AsyncSequence<T, any Error> {
-        self.values().map { data in
+        values().map { data in
             try decoder.decode(T.self, from: data)
         }
     }
-    
-    
+
     private func removeListener(withId id: UUID) {
         listeners[id] = nil
     }
@@ -133,7 +132,7 @@ public class WebKitBackend: NSObject, CommunicationBackend {
     @MainActor
     func register(on webView: WKWebView) {
         self.webView = webView
-        
+
         // observe navigation changes
         let didNavigateScript = """
         (function() {
@@ -152,7 +151,7 @@ public class WebKitBackend: NSObject, CommunicationBackend {
         let userScript = WKUserScript(source: didNavigateScript, injectionTime: .atDocumentEnd, forMainFrameOnly: false)
         webView.configuration.userContentController.addUserScript(userScript)
     }
-    
+
     package func send(_ type: EventType, data: some Encodable) async throws {
         guard let webView else {
             Self.logger.error("send called before webView was registered")

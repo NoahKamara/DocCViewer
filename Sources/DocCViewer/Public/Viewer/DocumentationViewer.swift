@@ -20,12 +20,12 @@ public class DocumentationViewer {
     @MainActor
     public init(provider: ResourceProvider) {
         self.schemaHandler = DocumentationSchemeHandler(provider: provider)
-        
-        let didNavigatePublisher = self.bridge.channel(for: .didNavigate)
-        
+
+        let didNavigatePublisher = bridge.channel(for: .didNavigate)
+
         self.monitoringTask = Task {
             let changes = await didNavigatePublisher.values()
-            
+
             do {
                 for try await url in changes {
                     await didNavigate()
@@ -39,7 +39,7 @@ public class DocumentationViewer {
     deinit {
         self.monitoringTask.cancel()
     }
-    
+
     @MainActor
     public convenience init(_ bundleProvider: BundleResourceProvider, app: AppResourceProvider) {
         self.init(provider: AnyResourceProvider(app: app, bundle: bundleProvider))
@@ -53,7 +53,7 @@ public class DocumentationViewer {
     public var canGoForward: Bool = false
 
     private var monitoringTask: Task<Void, Never> = Task {}
-    
+
     @MainActor
     private func didNavigate() {
         withMutation(keyPath: \.canGoForward) {
@@ -63,7 +63,7 @@ public class DocumentationViewer {
             self.canGoBack = coordinator?.view?.canGoBack == true
         }
     }
-    
+
     @MainActor
     public func goBack() {
         coordinator?.view?.goBack()
