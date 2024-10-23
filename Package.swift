@@ -20,7 +20,7 @@ let package = Package(
         .target(name: "BundleAppSourceProvider",
                 dependencies: ["DocCViewerCore"],
                 resources: [
-                    .copy("Resources"),
+                    .copy("ArchiveResources"),
                 ]),
 
         .target(name: "DocCViewerCore"),

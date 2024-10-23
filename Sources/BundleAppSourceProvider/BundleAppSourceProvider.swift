@@ -12,6 +12,7 @@ enum BundleAppSourceError: Error {
     case notFound
 }
 
+
 public struct BundleAppSourceProvider: ResourceProvider {
     let bundleProvider: BundleResourceProvider
     let bundle: Bundle
@@ -22,7 +23,9 @@ public struct BundleAppSourceProvider: ResourceProvider {
     }
 
     func resource(at path: String) throws -> Data {
-        guard let resourcesURL = bundle.resourceURL?.appending(component: "Resources") else {
+        let resourcesURL = bundle.resourceURL?.appending(component: "ArchiveResources")
+        
+        guard let resourcesURL else {
             throw BundleAppSourceError.notFound
         }
 
