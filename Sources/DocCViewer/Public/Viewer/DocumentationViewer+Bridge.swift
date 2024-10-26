@@ -15,11 +15,11 @@ public extension DocumentationViewer {
         package var backend: CommunicationBackend? = nil
         private var channels: [EventType: AsyncChannel] = [:]
 
-        package func emit<T: Encodable>(_ type: EventType, value: T) throws {
+        package func emit(_ type: EventType, value: some Encodable) throws {
             let data = try JSONEncoder().encode(value)
             emit(type, data: data)
         }
-        
+
         package func emit(_ type: EventType, data: Data) {
             Self.logger.info("emitted '\(type)'")
 

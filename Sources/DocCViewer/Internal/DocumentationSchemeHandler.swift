@@ -54,7 +54,7 @@ extension DocumentationSchemeHandler: WKURLSchemeHandler {
         tasks[urlSchemeTask.request]?.cancel()
         tasks[urlSchemeTask.request] = nil
     }
-    
+
     private func loadResource(at url: URL) async -> (Data, URLResponse) {
         guard let resource = Resource(url: url) else {
             logger.warning("[GET] \(url): Not a resource URL")
@@ -69,18 +69,18 @@ extension DocumentationSchemeHandler: WKURLSchemeHandler {
             logger.debug("[GET] \(url): overriding theme-settings.json")
 
             var data: Data? = nil
-            
+
             // Attempt to use custom theme if allowed
             if useCustomTheme {
                 logger.debug("[GET] \(url): attempting to load custom theme")
-                
+
                 do {
                     data = try await provider.provide(resource)
                 } catch {
                     logger.debug("[GET] \(url): failed to load custom theme-settings.json")
                 }
             }
-            
+
             // Load global theme if available
             if let globalThemeSettings {
                 logger.debug("[GET] \(url): attempting to load encode global theme")
@@ -91,20 +91,19 @@ extension DocumentationSchemeHandler: WKURLSchemeHandler {
                     return (Data(), HTTPURLResponse.error(url: url, statusCode: 500, error: error))
                 }
             }
-            
-            
+
             guard let data else {
                 logger.warning("[GET] \(url): neither global theme nor custom theme")
                 return (Data(), HTTPURLResponse.error(url: url, statusCode: 404))
             }
-            
+
             print(String(data: data, encoding: .utf8)!)
             return (
                 data,
                 HTTPURLResponse.response(url: url, type: .json, contentLength: data.count)
             )
         }
-        
+
         do {
             let responseType = UTType(filenameExtension: url.pathExtension) ?? .html
             let data = try await provider.provide(resource)
@@ -121,21 +120,20 @@ extension DocumentationSchemeHandler: WKURLSchemeHandler {
     }
 }
 
-fileprivate extension HTTPURLResponse {
+private extension HTTPURLResponse {
     static func error(url: URL, statusCode: Int, error: (any Error)? = nil) -> HTTPURLResponse {
         HTTPURLResponse(
             url: url,
             statusCode: statusCode,
             httpVersion: nil,
             headerFields: [
-                "X-Documentation-Provider-Error": "\(error.map({ "\($0)" }) ?? "-")",
+                "X-Documentation-Provider-Error": "\(error.map { "\($0)" } ?? "-")",
             ]
         )!
     }
-    
-    
+
     static func response(url: URL, type: UTType, contentLength: Int) -> HTTPURLResponse {
-        return HTTPURLResponse(
+        HTTPURLResponse(
             url: url,
             mimeType: type.preferredMIMEType ?? "text/html",
             expectedContentLength: contentLength,

@@ -6,10 +6,10 @@
 //
 
 @_exported import DocCViewerCore
+import Docsy
 import Foundation
 import Observation
 import OSLog
-import Docsy
 
 @Observable
 public class DocumentationViewer {
@@ -17,7 +17,7 @@ public class DocumentationViewer {
     let schemaHandler: DocumentationSchemeHandler
     public let bridge: Bridge = .init()
     private var coordinator: DocumentationView.Coordinator?
-    
+
     @MainActor
     public var themeSettings: ThemeSettings? {
         get { schemaHandler.globalThemeSettings }
@@ -26,7 +26,7 @@ public class DocumentationViewer {
             reload()
         }
     }
-    
+
     @MainActor
     public var useCustomTheme: Bool {
         get { schemaHandler.useCustomTheme }
@@ -35,11 +35,11 @@ public class DocumentationViewer {
             reload()
         }
     }
-    
+
     @MainActor
     public init(provider: ResourceProvider, globalThemeSettings: ThemeSettings? = nil) {
         self.schemaHandler = DocumentationSchemeHandler(provider: provider)
-        self.schemaHandler.globalThemeSettings = globalThemeSettings
+        schemaHandler.globalThemeSettings = globalThemeSettings
 
         let didNavigatePublisher = bridge.channel(for: .didNavigate)
 
@@ -62,9 +62,9 @@ public class DocumentationViewer {
 
     @MainActor
     func reload() {
-        self.coordinator?.view?.reload()
+        coordinator?.view?.reload()
     }
-    
+
     @MainActor
     public convenience init(_ bundleProvider: BundleResourceProvider, app: AppResourceProvider) {
         self.init(provider: AnyResourceProvider(app: app, bundle: bundleProvider))
@@ -79,8 +79,8 @@ public class DocumentationViewer {
 
     private var monitoringTask: Task<Void, Never> = Task {}
 
-    var currentTopic: TopicURL? = nil
-    
+    var currentTopic: TopicURL?
+
     @MainActor
     private func didNavigate(to url: URL) {
         withMutation(keyPath: \.canGoForward) {
@@ -89,13 +89,13 @@ public class DocumentationViewer {
         withMutation(keyPath: \.canGoBack) {
             self.canGoBack = coordinator?.view?.canGoBack == true
         }
-        
+
         guard let topicUrl = TopicURL(url: url) else {
             print("invalid topic url: \(url)")
             return
         }
-        
-        self.currentTopic = topicUrl
+
+        currentTopic = topicUrl
     }
 
     @MainActor
@@ -114,12 +114,12 @@ public class DocumentationViewer {
             .debug(
                 "navigating '\(self.currentTopic?.url.absoluteString ?? "-")' -> '\(topicUrl.url)'"
             )
-        
+
         guard currentTopic != topicUrl else {
             logger.debug("DEBOUNDE: navigating to \(topicUrl.url)")
             return
         }
-        
+
         defer { self.currentTopic = topicUrl }
         guard let currentTopic, currentTopic.bundleIdentifier == topicUrl.bundleIdentifier else {
             logger.debug("attempt full page navigation to \(topicUrl.url)")

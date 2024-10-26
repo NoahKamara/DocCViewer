@@ -1,14 +1,14 @@
 //
-//  File.swift
+//  Theme.swift
 //  DocCViewer
 //
-//  Created by Noah Kamara on 25.10.24.
+//  Copyright © 2024 Noah Kamara.
 //
 
 import Foundation
 
 public struct ThemeSettings: Encodable {
-    public var theme: Theme = Theme(
+    public var theme: Theme = .init(
         aside: .init(),
         badge: .init(),
         borderRadius: nil,
@@ -16,13 +16,13 @@ public struct ThemeSettings: Encodable {
         code: .init(),
         color: .init([:])
     )
-    
-    public var features: Features = Features(
+
+    public var features: Features = .init(
         docs: .init(quickNavigation: nil, onThisPageNavigator: nil, i18n: nil)
     )
-    
+
     public var typography: Typography = .init(htmlFont: nil, htmlFontMono: nil)
-    
+
     public init(theme: Theme? = nil, features: Features? = nil) {
         if let theme {
             self.theme = theme
@@ -33,27 +33,26 @@ public struct ThemeSettings: Encodable {
     }
 }
 
-
 // MARK: Features
+
 public extension ThemeSettings {
     /// Flags for enabling or disabling features of the website.
     struct Features: Encodable {
         public var docs: Docs
-        
+
         public init(docs: Docs? = nil) {
-            
             self.docs = docs ?? Docs()
         }
     }
 }
 
-public extension Optional where Wrapped == ThemeSettings.Features.EnableFeature {
+public extension ThemeSettings.Features.EnableFeature? {
     mutating func enable() {
         self = .init(enable: true)
     }
 }
 
-public extension Optional where Wrapped == ThemeSettings.Features.DisableFeature {
+public extension ThemeSettings.Features.DisableFeature? {
     mutating func disable() {
         self = .init(disable: true)
     }
@@ -65,7 +64,7 @@ public extension ThemeSettings.Features {
         public var quickNavigation: EnableFeature? = nil
         public var onThisPageNavigator: DisableFeature? = nil
         public var i18n: EnableFeature? = nil
-        
+
         public init(
             quickNavigation: EnableFeature? = nil,
             onThisPageNavigator: DisableFeature? = nil,
@@ -81,7 +80,7 @@ public extension ThemeSettings.Features {
     struct EnableFeature: Encodable {
         /// Determines whether the feature is enabled.
         public var enable: Bool
-        
+
         public init(enable: Bool) {
             self.enable = enable
         }
@@ -91,15 +90,15 @@ public extension ThemeSettings.Features {
     struct DisableFeature: Encodable {
         /// Determines whether the feature is disabled.
         public var disable: Bool
-        
+
         public init(disable: Bool) {
             self.disable = disable
         }
     }
 }
 
-
 // MARK: Theme
+
 public extension ThemeSettings {
     /// Settings concerning the visual appearance of the DoccViewer and the styling of its components.
     struct Theme: Encodable {
@@ -119,7 +118,7 @@ public extension ThemeSettings {
         public var code: Code
 
         public var color: ColorScheme
-        
+
         public init(
             aside: BorderAttributes = BorderAttributes(),
             badge: BorderAttributes = BorderAttributes(),
@@ -138,8 +137,8 @@ public extension ThemeSettings {
     }
 }
 
-
 // MARK: Element Settings
+
 public extension ThemeSettings.Theme {
     /// Represents attributes for border styling.
     struct BorderAttributes: Encodable {
@@ -151,13 +150,13 @@ public extension ThemeSettings.Theme {
 
         /// A CSS value for `border-width`.
         public var borderWidth: String? = nil
-        
+
         enum CodingKeys: String, CodingKey {
             case borderRadius = "border-radius"
             case borderStyle = "border-style"
             case borderWidth = "border-width"
         }
-        
+
         public init(
             borderRadius: String? = nil,
             borderStyle: String? = nil,
@@ -167,9 +166,9 @@ public extension ThemeSettings.Theme {
             self.borderStyle = borderStyle
             self.borderWidth = borderWidth
         }
-        
+
         fileprivate func hasValues() -> Bool {
-            [borderRadius, borderStyle, borderWidth ].contains(where: { $0 != nil })
+            [borderRadius, borderStyle, borderWidth].contains(where: { $0 != nil })
         }
     }
 
@@ -177,7 +176,7 @@ public extension ThemeSettings.Theme {
     struct Code: Encodable {
         /// The number of spaces used to indent multi-parameter Swift symbol declarations.
         public var indentationWidth: Int? = nil
-        
+
         /// A CSS value for `border-radius`.
         public var borderRadius: String? = nil
 
@@ -186,14 +185,14 @@ public extension ThemeSettings.Theme {
 
         /// A CSS value for `border-width`.
         public var borderWidth: String? = nil
-        
+
         enum CodingKeys: String, CodingKey {
             case indentationWidth
             case borderRadius = "border-radius"
             case borderStyle = "border-style"
             case borderWidth = "border-width"
         }
-        
+
         public init(
             indentationWidth: Int? = nil,
             borderRadius: String? = nil,
@@ -205,7 +204,7 @@ public extension ThemeSettings.Theme {
             self.borderStyle = borderStyle
             self.borderWidth = borderWidth
         }
-        
+
         fileprivate func hasValues() -> Bool {
             [borderRadius, borderStyle, borderWidth, indentationWidth].contains(where: { $0 != nil })
         }
@@ -239,7 +238,7 @@ public extension ThemeSettings.Theme {
 
         /// The URL for the dark mode frame image.
         public var darkUrl: URL? = nil
-        
+
         public init(
             screenTop: Double? = nil,
             screenWidth: Double? = nil,
@@ -259,37 +258,43 @@ public extension ThemeSettings.Theme {
             self.lightUrl = lightUrl
             self.darkUrl = darkUrl
         }
-        
+
         fileprivate func hasValues() -> Bool {
-            [screenTop, screenWidth, screenHeight, screenLeft,
-             frameWidth, frameHeight, lightUrl, darkUrl].contains(where: { $0 != nil })
+            [
+                screenTop,
+                screenWidth,
+                screenHeight,
+                screenLeft,
+                frameWidth,
+                frameHeight,
+                lightUrl,
+                darkUrl,
+            ].contains(where: { $0 != nil })
         }
     }
 }
 
-
 // MARK: ColorScheme
+
 public extension ThemeSettings.Theme {
     /// An object where each key represents the name of a color variable referenced in the renderer.
     /// A CSS property in the form `--color-[key]` will either be created or overwritten with the value associated with it.
     @dynamicMemberLookup
     struct ColorScheme: Encodable {
-        public typealias ColorMap = Dictionary<String,Color>
+        public typealias ColorMap = [String: Color]
         private var values: ColorMap
-        
+
         public var keys: ColorMap.Keys { values.keys }
 
         public subscript(_ key: String) -> Color? {
-            get {
-                values[key]
-            }
+            values[key]
         }
-        
+
         public subscript(dynamicMember keyPath: KeyPath<Colors, String>) -> Color? {
             get { self[Colors[keyPath]] }
             set {
                 let key: String = Colors[keyPath]
-                
+
                 if let newValue {
                     self[key] = newValue
                 } else {
@@ -297,7 +302,7 @@ public extension ThemeSettings.Theme {
                 }
             }
         }
-        
+
         @_disfavoredOverload
         public subscript(_ key: String) -> Color {
             get {
@@ -307,11 +312,11 @@ public extension ThemeSettings.Theme {
                 values[key] = newValue
             }
         }
-        
+
         public init(_ values: [String: Color]) {
             self.values = values
         }
-        
+
         public func encode(to encoder: any Encoder) throws {
             try values.encode(to: encoder)
         }
@@ -324,48 +329,47 @@ public extension ThemeSettings.Theme {
 
         /// A pair of light and dark CSS color values.
         case pair(light: Value, dark: Value)
-        
+
         static func single(variable: KeyPath<Colors, String>) -> Color {
             .single(.init(rawValue: Colors[variable]))
         }
-        
+
         static func single(variable: String) -> Color {
             assert(variable.prefix(2) == "==")
             return .single(.init(rawValue: "var(\(variable))"))
         }
-        
+
         static func pair(light: KeyPath<Colors, String>, dark: KeyPath<Colors, String>) -> Color {
             .pair(light: .init(rawValue: Colors[light]),
                   dark: .init(rawValue: Colors[dark]))
         }
-        
+
         public struct Value: RawRepresentable, ExpressibleByStringLiteral, Encodable {
             public let rawValue: String
-            
+
             public init(rawValue: String) {
                 self.rawValue = rawValue
             }
-            
+
             public init(stringLiteral value: String) {
                 self.init(rawValue: value)
             }
-            
+
             public func encode(to encoder: any Encoder) throws {
                 try rawValue.encode(to: encoder)
             }
-            
+
             public static func variable(_ variable: StringLiteralType) -> Self {
                 assert(variable.prefix(2) == "--")
                 return self.init(rawValue: "var(\(variable))")
             }
         }
-        
+
         enum PairCodingKeys: CodingKey {
             case light
             case dark
         }
-        
-        
+
         public func encode(to encoder: any Encoder) throws {
             switch self {
             case .single(let value):
@@ -381,7 +385,7 @@ public extension ThemeSettings.Theme {
 
 extension ThemeSettings.Theme.Color.Value {
     init(color: SwiftUI.Color, in environment: EnvironmentValues) {
-        self.init(rawValue: "#"+color.toHex())
+        self.init(rawValue: "#" + color.toHex())
     }
 }
 
@@ -394,20 +398,20 @@ extension SwiftUI.Color {
 #else
         let cgColor = UIColor(self).cgColor
 #endif
-        
+
         guard let components = cgColor.components, components.count >= 3 else {
             return "000000"
         }
-        
+
         let r = Float(components[0])
         let g = Float(components[1])
         let b = Float(components[2])
         var a = Float(1.0)
-        
+
         if components.count >= 4 {
             a = Float(components[3])
         }
-        
+
         if a != Float(1.0) {
             return String(format: "%02lX%02lX%02lX%02lX", lroundf(r * 255), lroundf(g * 255), lroundf(b * 255), lroundf(a * 255))
         } else {
@@ -421,9 +425,9 @@ extension ThemeSettings: CustomStringConvertible {
     public var description: String {
         do {
             let data = try JSONEncoder().encode(self)
-            
+
             return String(
-                data: data, //try JSONSerialization.data(withJSONObject: self, options: [.prettyPrinted, .fragmentsAllowed]),
+                data: data, // try JSONSerialization.data(withJSONObject: self, options: [.prettyPrinted, .fragmentsAllowed]),
                 encoding: .utf8
             )!
         } catch {

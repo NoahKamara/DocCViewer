@@ -5,11 +5,10 @@
 //  Copyright © 2024 Noah Kamara.
 //
 
+import DocCViewerCore
 import OSLog
 import SwiftUI
 import WebKit
-import DocCViewerCore
-
 
 public struct DocumentationView {
     public class Coordinator: NSObject, WKNavigationDelegate {
@@ -20,20 +19,20 @@ public struct DocumentationView {
         init(viewer: DocumentationViewer) {
             self.viewer = viewer
         }
-        
+
         public func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction) async -> WKNavigationActionPolicy {
             guard let url = navigationAction.request.url else {
                 return .cancel
             }
-            
+
             guard url.scheme == "doc" else {
                 try? viewer.bridge.emit(.openURL, value: url)
                 return .cancel
             }
-            
+
             return .allow
         }
-//        
+//
 //        @MainActor
 //        func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
 //            if let url = navigationAction.request.url {
@@ -51,7 +50,6 @@ public struct DocumentationView {
     }
 
     let viewer: DocumentationViewer
-    
 
     public init(viewer: DocumentationViewer) {
         self.viewer = viewer
@@ -65,22 +63,22 @@ public struct DocumentationView {
     @MainActor
     func makeView(context: Context) -> WKWebView {
         let config = WKWebViewConfiguration()
-        
+
         // Configure URL Handler
         config.setURLSchemeHandler(viewer.schemaHandler, forURLScheme: "doc")
         config.preferences.javaScriptCanOpenWindowsAutomatically = true
-        
+
         // Configure Communication
         let contentController = WKUserContentController()
         let communicationBackend = WebKitBackend(delegate: context.coordinator.viewer.bridge)
         contentController.add(communicationBackend, name: "bridge")
         config.userContentController = contentController
-        
+
         let view = WKWebView(frame: .zero, configuration: config)
         context.coordinator.view = view
         context.coordinator.viewer.bridge.backend = communicationBackend
         view.navigationDelegate = context.coordinator
-        
+
         // Connect Communication & register viewer
         communicationBackend.register(on: view)
         viewer.register(context.coordinator)
@@ -97,14 +95,13 @@ public extension URL {
     static let doc = URL(string: "doc://")!
 }
 
-
 struct PreviewProvider: ResourceProvider {
     let baseURI: URL
-    
+
     init(baseURI: URL = URL(string: "https://developer.apple.com/")!) {
         self.baseURI = baseURI
     }
-    
+
     func provideAsset(_ kind: DocCViewerCore.BundleAssetKind, forBundle identifier: String, at path: String) async throws -> Data {
         let url = baseURI.appending(path: path)
         return try await URLSession.shared.data(from: url).0

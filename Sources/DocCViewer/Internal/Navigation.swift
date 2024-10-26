@@ -10,7 +10,7 @@ import WebKit
 
 public struct TopicURL: Equatable {
     public static let scheme = "doc"
-    
+
     public let bundleIdentifier: String
     public let path: String
 
@@ -18,7 +18,7 @@ public struct TopicURL: Equatable {
         self.bundleIdentifier = bundleIdentifier
         self.path = path
     }
-    
+
     public init?(url: URL) {
         if let host = url.host() {
             self.init(bundleIdentifier: host, path: url.path())
@@ -30,9 +30,7 @@ public struct TopicURL: Equatable {
         }
     }
 
-
     public var url: URL {
         URL(string: "doc://\(bundleIdentifier)\(path)")!
     }
 }
-
