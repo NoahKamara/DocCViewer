@@ -10,8 +10,9 @@ import SwiftUI
 import WebKit
 import DocCViewerCore
 
+
 public struct DocumentationView {
-    public class Coordinator {
+    public class Coordinator: NSObject, WKNavigationDelegate {
         let viewer: DocumentationViewer
         var view: WKWebView?
 
@@ -19,6 +20,34 @@ public struct DocumentationView {
         init(viewer: DocumentationViewer) {
             self.viewer = viewer
         }
+        
+        public func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction) async -> WKNavigationActionPolicy {
+            guard let url = navigationAction.request.url else {
+                return .cancel
+            }
+            
+            guard url.scheme == "doc" else {
+                try? viewer.bridge.emit(.openURL, value: url)
+                return .cancel
+            }
+            
+            return .allow
+        }
+//        
+//        @MainActor
+//        func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
+//            if let url = navigationAction.request.url {
+//                print("HELLO ZRL")
+//                if url.scheme == TopicURL.scheme {
+//                    decisionHandler(.allow)
+//                } else {
+//                    print("emitted call url \(url)")
+//                    decisionHandler(.cancel)
+//                }
+//            } else {
+//                decisionHandler(.allow)
+//            }
+//        }
     }
 
     let viewer: DocumentationViewer
@@ -50,6 +79,7 @@ public struct DocumentationView {
         let view = WKWebView(frame: .zero, configuration: config)
         context.coordinator.view = view
         context.coordinator.viewer.bridge.backend = communicationBackend
+        view.navigationDelegate = context.coordinator
         
         // Connect Communication & register viewer
         communicationBackend.register(on: view)

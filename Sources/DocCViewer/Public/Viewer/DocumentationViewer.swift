@@ -110,7 +110,10 @@ public class DocumentationViewer {
 
     @MainActor
     public func navigate(to topicUrl: TopicURL) {
-        logger.debug("navigating to \(topicUrl.url)")
+        logger
+            .debug(
+                "navigating '\(self.currentTopic?.url.absoluteString ?? "-")' -> '\(topicUrl.url)'"
+            )
         
         guard currentTopic != topicUrl else {
             logger.debug("DEBOUNDE: navigating to \(topicUrl.url)")
@@ -118,11 +121,7 @@ public class DocumentationViewer {
         }
         
         defer { self.currentTopic = topicUrl }
-        guard
-            let currentUrl = coordinator?.view?.url,
-            let currentBundleId = currentUrl.host ?? currentUrl.pathComponents.first,
-            currentBundleId == currentTopic?.bundleIdentifier
-        else {
+        guard let currentTopic, currentTopic.bundleIdentifier == topicUrl.bundleIdentifier else {
             logger.debug("attempt full page navigation to \(topicUrl.url)")
             coordinator?.view?.load(.init(url: topicUrl.url))
             return

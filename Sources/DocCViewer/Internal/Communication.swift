@@ -43,6 +43,10 @@ public extension EventType {
     /// an event sent by the viewer after navigating to a page
     /// > data is the current page URL
     static let didNavigate = EventType("didNavigate")
+    
+    /// an event sent by the viewer when the user clicked on a non-documentation url
+    /// > data is the requested URL
+    static let openURL = EventType("openURL")
 }
 
 // struct Event<T: Codable>: RawRepresentable {

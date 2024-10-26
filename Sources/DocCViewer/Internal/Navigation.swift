@@ -9,6 +9,8 @@ import Foundation
 import WebKit
 
 public struct TopicURL: Equatable {
+    public static let scheme = "doc"
+    
     public let bundleIdentifier: String
     public let path: String
 
@@ -34,18 +36,3 @@ public struct TopicURL: Equatable {
     }
 }
 
-extension DocumentationSchemeHandler: WKNavigationDelegate {
-    public func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction) async -> WKNavigationActionPolicy {
-        guard navigationAction.request.url?.scheme == "doc" else {
-            return .cancel
-        }
-
-        return .allow
-    }
-
-    public func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {}
-
-    func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
-        webView.reload()
-    }
-}
