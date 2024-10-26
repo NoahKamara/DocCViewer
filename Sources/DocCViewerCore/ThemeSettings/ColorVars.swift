@@ -22,6 +22,25 @@ public extension ThemeSettings.Theme {
             Color.Value(rawValue: shared[keyPath: keyPath])
         }
         
+        public let typeIconBlue = "type-icon-blue"
+        public let typeIconGreen = "type-icon-green"
+        public let typeIconOrange = "type-icon-orange"
+        public let typeIconPink = "type-icon-pink"
+        public let typeIconPurple = "type-icon-purple"
+        public let typeIconSky = "type-icon-sky"
+        public let typeIconTeal = "type-icon-teal"
+
+        public let notFoundInputBackground = "not-found-input-background"
+        public let notFoundInputBorder = "not-found-input-border"
+
+        public let figureLightBlue = "figureLight-blue"
+
+        
+public let grid = "grid"
+        
+public let highlightGreen = "highlight-green"
+public let highlightRed = "highlight-red"
+        
         public var articleBackground: String { "article-background" }
         public var articleBodyBackground: String { "article-body-background" }
         public var asideDeprecated: String { "aside-deprecated" }
@@ -81,6 +100,7 @@ public extension ThemeSettings.Theme {
         public var dropdownOptionText: String { "dropdown-option-text" }
         public var dropdownText: String { "dropdown-text" }
         public var eyebrow: String { "eyebrow" }
+        
         public var figureBlue: String { "figure-blue" }
         public var figureGray: String { "figure-gray" }
         public var figureGraySecondary: String { "figure-gray-secondary" }
@@ -88,21 +108,36 @@ public extension ThemeSettings.Theme {
         public var figureGrayTertiary: String { "figure-gray-tertiary" }
         public var figureGreen: String { "figure-green" }
         public var figureLightGray: String { "figure-light-gray" }
+        
         public var figureOrange: String { "figure-orange" }
         public var figureRed: String { "figure-red" }
+        public let figurePink = "figure-pink"
+        public let figurePurple = "figure-purple"
+        public let figureTeal = "figure-teal"
+        public let figureYellow = "figure-yellow"
+        
         public var fill: String { "fill" }
-        public var fillBlue: String { "fill-blue" }
-        public var fillGray: String { "fill-gray" }
-        public var fillGrayQuaternary: String { "fill-gray-quaternary" }
-        public var fillGraySecondary: String { "fill-gray-secondary" }
-        public var fillGrayTertiary: String { "fill-gray-tertiary" }
-        public var fillGreenSecondary: String { "fill-green-secondary" }
-        public var fillLightBlueSecondary: String { "fill-light-blue-secondary" }
-        public var fillOrangeSecondary: String { "fill-orange-secondary" }
-        public var fillQuaternary: String { "fill-quaternary" }
-        public var fillRedSecondary: String { "fill-red-secondary" }
         public var fillSecondary: String { "fill-secondary" }
         public var fillTertiary: String { "fill-tertiary" }
+        public var fillQuaternary: String { "fill-quaternary" }
+
+        public var fillBlue: String { "fill-blue" }
+        public var fillBlueSecondary: String { "fill-blue-secondary" }
+        public var fillLightBlueSecondary: String { "fill-light-blue-secondary" }
+
+        public var fillGray: String { "fill-gray" }
+        public var fillGraySecondary: String { "fill-gray-secondary" }
+        public var fillGrayTertiary: String { "fill-gray-tertiary" }
+        public var fillGrayQuaternary: String { "fill-gray-quaternary" }
+        public let fillLightGraySecondary = "fillLight-gray-secondary"
+        
+        public var fillGreenSecondary: String { "fill-green-secondary" }
+        public let fillPurpleSecondary = "fill-purple-secondary"
+        public let fillTealSecondary = "fill-teal-secondary"
+        public let fillYellowSecondary = "fill-yellow-secondary"
+        public var fillOrangeSecondary: String { "fill-orange-secondary" }
+        public var fillRedSecondary: String { "fill-red-secondary" }
+        
         public var focusBorderColor: String { "focus-border-color" }
         public var focusColor: String { "focus-color" }
         public var formError: String { "form-error" }
@@ -110,7 +145,6 @@ public extension ThemeSettings.Theme {
         public var formValid: String { "form-valid" }
         public var formValidBackground: String { "form-valid-background" }
         public var genericModalBackground: String { "generic-modal-background" }
-        public var grid: String { "grid" }
         public var headerText: String { "header-text" }
         public var heroEyebrow: String { "hero-eyebrow" }
         public var link: String { "link" }
@@ -156,6 +190,15 @@ public extension ThemeSettings.Theme {
         public var runtimePreviewDisabledText: String { "runtime-preview-disabled-text" }
         public var runtimePreviewText: String { "runtime-preview-text" }
         public var secondaryLabel: String { "secondary-label" }
+        
+        public let standardBlue: String = "standard-blue"
+        public let standardGray: String = "standard-gray"
+        public let standardGreen: String = "standard-green"
+        public let standardOrange: String = "standard-orange"
+        public let standardPurple: String = "standard-purple"
+        public let standardRed: String = "standard-red"
+        public let standardYellow: String = "standard-yellow"
+
         public var standardBlueDocumentationIntroFill: String { "standard-blue-documentation-intro-fill" }
         public var standardGrayDocumentationIntroFill: String { "standard-gray-documentation-intro-fill" }
         public var standardGreenDocumentationIntroFill: String { "standard-green-documentation-intro-fill" }

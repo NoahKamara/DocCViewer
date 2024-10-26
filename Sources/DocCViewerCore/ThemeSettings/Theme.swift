@@ -21,6 +21,8 @@ public struct ThemeSettings: Encodable {
         docs: .init(quickNavigation: nil, onThisPageNavigator: nil, i18n: nil)
     )
     
+    public var typography: Typography = .init(htmlFont: nil, htmlFontMono: nil)
+    
     public init(theme: Theme? = nil, features: Features? = nil) {
         if let theme {
             self.theme = theme
@@ -150,6 +152,12 @@ public extension ThemeSettings.Theme {
         /// A CSS value for `border-width`.
         public var borderWidth: String? = nil
         
+        enum CodingKeys: String, CodingKey {
+            case borderRadius = "border-radius"
+            case borderStyle = "border-style"
+            case borderWidth = "border-width"
+        }
+        
         public init(
             borderRadius: String? = nil,
             borderStyle: String? = nil,
@@ -178,6 +186,13 @@ public extension ThemeSettings.Theme {
 
         /// A CSS value for `border-width`.
         public var borderWidth: String? = nil
+        
+        enum CodingKeys: String, CodingKey {
+            case indentationWidth
+            case borderRadius = "border-radius"
+            case borderStyle = "border-style"
+            case borderWidth = "border-width"
+        }
         
         public init(
             indentationWidth: Int? = nil,
@@ -314,6 +329,11 @@ public extension ThemeSettings.Theme {
             .single(.init(rawValue: Colors[variable]))
         }
         
+        static func single(variable: String) -> Color {
+            assert(variable.prefix(2) == "==")
+            return .single(.init(rawValue: "var(\(variable))"))
+        }
+        
         static func pair(light: KeyPath<Colors, String>, dark: KeyPath<Colors, String>) -> Color {
             .pair(light: .init(rawValue: Colors[light]),
                   dark: .init(rawValue: Colors[dark]))
@@ -333,6 +353,11 @@ public extension ThemeSettings.Theme {
             public func encode(to encoder: any Encoder) throws {
                 try rawValue.encode(to: encoder)
             }
+            
+            public static func variable(_ variable: StringLiteralType) -> Self {
+                assert(variable.prefix(2) == "--")
+                return self.init(rawValue: "var(\(variable))")
+            }
         }
         
         enum PairCodingKeys: CodingKey {
@@ -350,6 +375,43 @@ public extension ThemeSettings.Theme {
                 try container.encode(light, forKey: .light)
                 try container.encode(dark, forKey: .dark)
             }
+        }
+    }
+}
+
+extension ThemeSettings.Theme.Color.Value {
+    init(color: SwiftUI.Color, in environment: EnvironmentValues) {
+        self.init(rawValue: "#"+color.toHex())
+    }
+}
+
+import SwiftUI
+
+extension SwiftUI.Color {
+    func toHex() -> String {
+#if os(macOS)
+        let cgColor = NSColor(self).cgColor
+#else
+        let cgColor = UIColor(self).cgColor
+#endif
+        
+        guard let components = cgColor.components, components.count >= 3 else {
+            return "000000"
+        }
+        
+        let r = Float(components[0])
+        let g = Float(components[1])
+        let b = Float(components[2])
+        var a = Float(1.0)
+        
+        if components.count >= 4 {
+            a = Float(components[3])
+        }
+        
+        if a != Float(1.0) {
+            return String(format: "%02lX%02lX%02lX%02lX", lroundf(r * 255), lroundf(g * 255), lroundf(b * 255), lroundf(a * 255))
+        } else {
+            return String(format: "%02lX%02lX%02lX", lroundf(r * 255), lroundf(g * 255), lroundf(b * 255))
         }
     }
 }
