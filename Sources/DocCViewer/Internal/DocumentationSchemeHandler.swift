@@ -16,6 +16,9 @@ class DocumentationSchemeHandler: NSObject {
     let logger = Logger.doccviewer("DocumentationSchemeHandler")
     let provider: ResourceProvider
 
+    var globalThemeSettings: ThemeSettings?
+    var useCustomTheme: Bool = false
+
     init(provider: ResourceProvider) {
         self.provider = provider
     }
@@ -51,39 +54,92 @@ extension DocumentationSchemeHandler: WKURLSchemeHandler {
         tasks[urlSchemeTask.request]?.cancel()
         tasks[urlSchemeTask.request] = nil
     }
-
+    
     private func loadResource(at url: URL) async -> (Data, URLResponse) {
         guard let resource = Resource(url: url) else {
             logger.warning("[GET] \(url): Not a resource URL")
-            return (Data(), HTTPURLResponse(url: url, statusCode: 404, httpVersion: nil, headerFields: nil)!)
+            return (Data(), HTTPURLResponse.error(url: url, statusCode: 404))
         }
 
-        do {
-            let responseType = UTType(filenameExtension: url.pathExtension)?.preferredMIMEType ?? "text/html"
-            let resourceData = try await provider.provide(resource)
+        // use global theme settings if available
+        if
+            case .bundleAsset(let asset) = resource,
+            asset.kind == .themeSettings
+        {
+            logger.debug("[GET] \(url): overriding theme-settings.json")
 
-            let urlResponse = HTTPURLResponse(
-                url: url,
-                mimeType: responseType,
-                expectedContentLength: resourceData.count,
-                textEncodingName: "utf-8"
+            var data: Data? = nil
+            
+            // Attempt to use custom theme if allowed
+            if useCustomTheme {
+                logger.debug("[GET] \(url): attempting to load custom theme")
+                
+                do {
+                    data = try await provider.provide(resource)
+                } catch {
+                    logger.debug("[GET] \(url): failed to load custom theme-settings.json")
+                }
+            }
+            
+            // Load global theme if available
+            if let globalThemeSettings {
+                logger.debug("[GET] \(url): attempting to load encode global theme")
+                do {
+                    data = try JSONEncoder().encode(globalThemeSettings)
+                } catch {
+                    logger.warning("[GET] \(url): failed to encode global theme-settings.json")
+                    return (Data(), HTTPURLResponse.error(url: url, statusCode: 500, error: error))
+                }
+            }
+            
+            
+            guard let data else {
+                logger.warning("[GET] \(url): neither global theme nor custom theme")
+                return (Data(), HTTPURLResponse.error(url: url, statusCode: 404))
+            }
+            
+            print(String(data: data, encoding: .utf8)!)
+            return (
+                data,
+                HTTPURLResponse.response(url: url, type: .json, contentLength: data.count)
             )
+        }
+        
+        do {
+            let responseType = UTType(filenameExtension: url.pathExtension) ?? .html
+            let data = try await provider.provide(resource)
 
-            logger.debug("[GET] \(url): provided \(resourceData.count, format: .byteCount) of '\(responseType)'")
-            return (resourceData, urlResponse)
+            logger.debug("[GET] \(url): provided \(data.count, format: .byteCount) of '\(responseType)'")
+            return (
+                data,
+                HTTPURLResponse.response(url: url, type: responseType, contentLength: data.count)
+            )
         } catch {
             logger.error("[GET] \(url) failed to load with error: \(error)")
-
-            let urlResponse = HTTPURLResponse(
-                url: url,
-                statusCode: 404,
-                httpVersion: nil,
-                headerFields: [
-                    "X-Documentation-Provider-Error": "\(error)",
-                ]
-            )!
-
-            return (Data(), urlResponse)
+            return (Data(), HTTPURLResponse.error(url: url, statusCode: 404, error: error))
         }
+    }
+}
+
+fileprivate extension HTTPURLResponse {
+    static func error(url: URL, statusCode: Int, error: (any Error)? = nil) -> HTTPURLResponse {
+        HTTPURLResponse(
+            url: url,
+            statusCode: statusCode,
+            httpVersion: nil,
+            headerFields: [
+                "X-Documentation-Provider-Error": "\(error.map({ "\($0)" }) ?? "-")",
+            ]
+        )!
+    }
+    
+    
+    static func response(url: URL, type: UTType, contentLength: Int) -> HTTPURLResponse {
+        return HTTPURLResponse(
+            url: url,
+            mimeType: type.preferredMIMEType ?? "text/html",
+            expectedContentLength: contentLength,
+            textEncodingName: "utf-8"
+        )
     }
 }

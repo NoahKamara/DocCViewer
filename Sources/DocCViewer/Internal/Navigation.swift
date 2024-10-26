@@ -8,7 +8,7 @@
 import Foundation
 import WebKit
 
-public struct TopicURL {
+public struct TopicURL: Equatable {
     public let bundleIdentifier: String
     public let path: String
 
@@ -16,6 +16,18 @@ public struct TopicURL {
         self.bundleIdentifier = bundleIdentifier
         self.path = path
     }
+    
+    public init?(url: URL) {
+        if let host = url.host() {
+            self.init(bundleIdentifier: host, path: url.path())
+        } else if let firstPathComponent = url.pathComponents.first {
+            let path = url.pathComponents.dropFirst().joined(separator: "/")
+            self.init(bundleIdentifier: firstPathComponent, path: path)
+        } else {
+            return nil
+        }
+    }
+
 
     public var url: URL {
         URL(string: "doc://\(bundleIdentifier)\(path)")!

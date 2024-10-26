@@ -104,7 +104,7 @@ public actor AsyncChannel {
         }
     }
 
-    public func values<T: Decodable & Sendable>(as type: T.Type, decoder: JSONDecoder = JSONDecoder()) -> some AsyncSequence<T, any Error> {
+    public func values<T: Decodable & Sendable>(as type: T.Type, decoder: JSONDecoder = JSONDecoder()) -> AsyncThrowingMapSequence<AsyncStream<Data>, T> {
         values().map { data in
             try decoder.decode(T.self, from: data)
         }

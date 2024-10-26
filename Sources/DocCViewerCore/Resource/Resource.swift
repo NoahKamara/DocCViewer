@@ -41,8 +41,8 @@ public enum Resource {
             self = .appSource(.init(kind: .js, path: url.path()))
         case "img":
             self = .appSource(.init(kind: .js, path: url.path()))
-//        case "theme-settings.json":
-//            self = .bundleAsset(.init(bundleIdentifier: bundleID, kind: , path: url.path()))
+        case "theme-settings.json":
+            self = .bundleAsset(.init(bundleIdentifier: bundleId, kind: .themeSettings, path: "theme-settings.json"))
         case nil:
             self = .appSource(.init(kind: .index, path: "index.html"))
         default:

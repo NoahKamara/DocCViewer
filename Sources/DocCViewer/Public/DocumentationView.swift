@@ -8,6 +8,7 @@
 import OSLog
 import SwiftUI
 import WebKit
+import DocCViewerCore
 
 public struct DocumentationView {
     public class Coordinator {
@@ -21,6 +22,7 @@ public struct DocumentationView {
     }
 
     let viewer: DocumentationViewer
+    
 
     public init(viewer: DocumentationViewer) {
         self.viewer = viewer
@@ -33,19 +35,23 @@ public struct DocumentationView {
 
     @MainActor
     func makeView(context: Context) -> WKWebView {
-        print("MAKE")
         let config = WKWebViewConfiguration()
+        
+        // Configure URL Handler
         config.setURLSchemeHandler(viewer.schemaHandler, forURLScheme: "doc")
         config.preferences.javaScriptCanOpenWindowsAutomatically = true
-
+        
+        // Configure Communication
         let contentController = WKUserContentController()
         let communicationBackend = WebKitBackend(delegate: context.coordinator.viewer.bridge)
         contentController.add(communicationBackend, name: "bridge")
         config.userContentController = contentController
-
+        
         let view = WKWebView(frame: .zero, configuration: config)
         context.coordinator.view = view
         context.coordinator.viewer.bridge.backend = communicationBackend
+        
+        // Connect Communication & register viewer
         communicationBackend.register(on: view)
         viewer.register(context.coordinator)
 
@@ -59,6 +65,29 @@ public struct DocumentationView {
 
 public extension URL {
     static let doc = URL(string: "doc://")!
+}
+
+
+struct PreviewProvider: ResourceProvider {
+    let baseURI: URL
+    
+    init(baseURI: URL = URL(string: "https://developer.apple.com/")!) {
+        self.baseURI = baseURI
+    }
+    
+    func provideAsset(_ kind: DocCViewerCore.BundleAssetKind, forBundle identifier: String, at path: String) async throws -> Data {
+        let url = baseURI.appending(path: path)
+        return try await URLSession.shared.data(from: url).0
+    }
+
+    func provideSource(_ kind: DocCViewerCore.AppSourceKind, at path: String) async throws -> Data {
+        let url = baseURI.appending(path: path)
+        return try await URLSession.shared.data(from: url).0
+    }
+}
+
+#Preview {
+    DocumentationView(viewer: .init(provider: PreviewProvider()))
 }
 
 #if os(macOS)

@@ -9,6 +9,7 @@
 import Foundation
 import Observation
 import OSLog
+import Docsy
 
 @Observable
 public class DocumentationViewer {
@@ -16,19 +17,38 @@ public class DocumentationViewer {
     let schemaHandler: DocumentationSchemeHandler
     public let bridge: Bridge = .init()
     private var coordinator: DocumentationView.Coordinator?
-
+    
     @MainActor
-    public init(provider: ResourceProvider) {
+    public var themeSettings: ThemeSettings? {
+        get { schemaHandler.globalThemeSettings }
+        set {
+            schemaHandler.globalThemeSettings = newValue
+            reload()
+        }
+    }
+    
+    @MainActor
+    public var useCustomTheme: Bool {
+        get { schemaHandler.useCustomTheme }
+        set {
+            schemaHandler.useCustomTheme = newValue
+            reload()
+        }
+    }
+    
+    @MainActor
+    public init(provider: ResourceProvider, globalThemeSettings: ThemeSettings? = nil) {
         self.schemaHandler = DocumentationSchemeHandler(provider: provider)
+        self.schemaHandler.globalThemeSettings = globalThemeSettings
 
         let didNavigatePublisher = bridge.channel(for: .didNavigate)
 
         self.monitoringTask = Task {
-            let changes = await didNavigatePublisher.values()
+            let changes = await didNavigatePublisher.values(as: URL.self)
 
             do {
                 for try await url in changes {
-                    await didNavigate()
+                    await didNavigate(to: url)
                 }
             } catch {
                 print("monitoring failed", error)
@@ -40,6 +60,11 @@ public class DocumentationViewer {
         self.monitoringTask.cancel()
     }
 
+    @MainActor
+    func reload() {
+        self.coordinator?.view?.reload()
+    }
+    
     @MainActor
     public convenience init(_ bundleProvider: BundleResourceProvider, app: AppResourceProvider) {
         self.init(provider: AnyResourceProvider(app: app, bundle: bundleProvider))
@@ -54,14 +79,23 @@ public class DocumentationViewer {
 
     private var monitoringTask: Task<Void, Never> = Task {}
 
+    var currentTopic: TopicURL? = nil
+    
     @MainActor
-    private func didNavigate() {
+    private func didNavigate(to url: URL) {
         withMutation(keyPath: \.canGoForward) {
             self.canGoForward = coordinator?.view?.canGoForward == true
         }
         withMutation(keyPath: \.canGoBack) {
             self.canGoBack = coordinator?.view?.canGoBack == true
         }
+        
+        guard let topicUrl = TopicURL(url: url) else {
+            print("invalid topic url: \(url)")
+            return
+        }
+        
+        self.currentTopic = topicUrl
     }
 
     @MainActor
@@ -77,10 +111,17 @@ public class DocumentationViewer {
     @MainActor
     public func navigate(to topicUrl: TopicURL) {
         logger.debug("navigating to \(topicUrl.url)")
-
+        
+        guard currentTopic != topicUrl else {
+            logger.debug("DEBOUNDE: navigating to \(topicUrl.url)")
+            return
+        }
+        
+        defer { self.currentTopic = topicUrl }
         guard
             let currentUrl = coordinator?.view?.url,
-            let currentBundleId = currentUrl.host ?? currentUrl.pathComponents.first
+            let currentBundleId = currentUrl.host ?? currentUrl.pathComponents.first,
+            currentBundleId == currentTopic?.bundleIdentifier
         else {
             logger.debug("attempt full page navigation to \(topicUrl.url)")
             coordinator?.view?.load(.init(url: topicUrl.url))
