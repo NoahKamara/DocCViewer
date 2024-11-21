@@ -1,3 +1,3 @@
 [submodule "swift-docc-render"]
 	path = swift-docc-render
-	url = https://github.com/swiftlang/swift-docc-render
+	url = https://github.com/NoahKamara/swift-docc-render.git
