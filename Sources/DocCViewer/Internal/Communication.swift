@@ -143,6 +143,10 @@ public class WebKitBackend: NSObject, CommunicationBackend {
             let lastUrl = window.location.href;
             new MutationObserver(() => {
                 const url = window.location.href;
+                if (window.baseUrl == undefined) {
+                    returnr
+                }
+        
                 if (url !== lastUrl) {
                     lastUrl = url;
                     console.debug("didNavigate")

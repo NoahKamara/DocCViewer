@@ -13,16 +13,21 @@ let package = Package(
         ),
         .library(name: "BundleAppSourceProvider", targets: ["BundleAppSourceProvider"]),
     ],
+    dependencies: [
+        .package(path: "../DocumentationKit"),
+    ],
     targets: [
-        .target(name: "DocCViewer",
-                dependencies: ["DocCViewerCore"]),
-
-        .target(name: "BundleAppSourceProvider",
-                dependencies: ["DocCViewerCore"],
-                resources: [
-                    .copy("ArchiveResources"),
-                ]),
-
-        .target(name: "DocCViewerCore"),
+        .target(
+            name: "DocCViewer",
+            dependencies: ["DocCViewerCore", "DocumentationKit"]
+        ),
+        
+            .target(name: "BundleAppSourceProvider",
+                    dependencies: ["DocCViewerCore"],
+                    resources: [
+                        .copy("ArchiveResources"),
+                    ]),
+        
+            .target(name: "DocCViewerCore"),
     ]
 )

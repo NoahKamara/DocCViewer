@@ -112,10 +112,10 @@ struct PreviewProvider: ResourceProvider {
         return try await URLSession.shared.data(from: url).0
     }
 }
-
-#Preview {
-    DocumentationView(viewer: .init(provider: PreviewProvider()))
-}
+//
+//#Preview {
+//    DocumentationView(viewer: .init(provider: PreviewProvider()))
+//}
 
 #if os(macOS)
 

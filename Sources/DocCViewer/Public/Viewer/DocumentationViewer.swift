@@ -9,37 +9,51 @@
 import Foundation
 import Observation
 import OSLog
+import SwiftDocC
+import DocumentationKit
 
 @Observable
 public class DocumentationViewer {
     let logger = Logger.doccviewer("Viewer")
-    let schemaHandler: DocumentationSchemeHandler
+    let schemaHandler: DocumentationSchemeHandler2
     public let bridge: Bridge = .init()
     private var coordinator: DocumentationView.Coordinator?
 
+//    @MainActor
+//    public var themeSettings: ThemeSettings? {
+//        get { schemaHandler.globalThemeSettings }
+//        set {
+//            schemaHandler.globalThemeSettings = newValue
+//            reload()
+//        }
+//    }
+
+//    @MainActor
+//    public var useCustomTheme: Bool {
+//        get { schemaHandler.useCustomTheme }
+//        set {
+//            schemaHandler.useCustomTheme = newValue
+//            reload()
+//        }
+//    }
+
     @MainActor
-    public var themeSettings: ThemeSettings? {
-        get { schemaHandler.globalThemeSettings }
-        set {
-            schemaHandler.globalThemeSettings = newValue
-            reload()
+    public init(provider: AsyncFileServerProvider, globalThemeSettings: ThemeSettings? = nil) {
+        let schemaHandler = DocumentationSchemeHandler2()
+        let memoryProvider = MemoryFileServerProvider()
+        
+        if let globalThemeSettings {
+            let data = try? JSONEncoder().encode(globalThemeSettings)
+            if let data {
+                memoryProvider.addFile(path: "theme-settings.json", data: data)
+            }
         }
-    }
 
-    @MainActor
-    public var useCustomTheme: Bool {
-        get { schemaHandler.useCustomTheme }
-        set {
-            schemaHandler.useCustomTheme = newValue
-            reload()
-        }
-    }
+        schemaHandler.fileServer.register(provider: provider)
 
-    @MainActor
-    public init(provider: ResourceProvider, globalThemeSettings: ThemeSettings? = nil) {
-        self.schemaHandler = DocumentationSchemeHandler(provider: provider)
-        schemaHandler.globalThemeSettings = globalThemeSettings
 
+        self.schemaHandler = schemaHandler
+        
         let didNavigatePublisher = bridge.channel(for: .didNavigate)
 
         self.monitoringTask = Task {
@@ -64,10 +78,10 @@ public class DocumentationViewer {
         coordinator?.view?.reload()
     }
 
-    @MainActor
-    public convenience init(_ bundleProvider: BundleResourceProvider, app: AppResourceProvider) {
-        self.init(provider: AnyResourceProvider(app: app, bundle: bundleProvider))
-    }
+//    @MainActor
+//    public convenience init(_ bundleProvider: BundleResourceProvider, app: AppResourceProvider) {
+//        self.init(provider: AnyResourceProvider(app: app, bundle: bundleProvider))
+//    }
 
     func register(_ coordinator: DocumentationView.Coordinator) {
         self.coordinator = coordinator
@@ -142,4 +156,5 @@ public class DocumentationViewer {
         closure(coordinator)
     }
 }
+
 
