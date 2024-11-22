@@ -8,6 +8,9 @@
 import Foundation
 import WebKit
 
+fileprivate let slashCharSet = CharacterSet(charactersIn: "/")
+
+
 public struct TopicURL: Equatable {
     public static let scheme = "doc"
 
@@ -16,7 +19,7 @@ public struct TopicURL: Equatable {
 
     public init(bundleIdentifier: String, path: String) {
         self.bundleIdentifier = bundleIdentifier
-        self.path = path
+        self.path = "/" + path.trimmingCharacters(in: slashCharSet)
     }
 
     public init?(url: URL) {
@@ -24,7 +27,10 @@ public struct TopicURL: Equatable {
             self.init(bundleIdentifier: host, path: url.path())
         } else if let firstPathComponent = url.pathComponents.first {
             let path = url.pathComponents.dropFirst().joined(separator: "/")
-            self.init(bundleIdentifier: firstPathComponent, path: path)
+            self.init(
+                bundleIdentifier: firstPathComponent,
+                path: path
+            )
         } else {
             return nil
         }

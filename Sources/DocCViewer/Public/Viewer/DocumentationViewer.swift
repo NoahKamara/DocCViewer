@@ -6,7 +6,6 @@
 //
 
 @_exported import DocCViewerCore
-import Docsy
 import Foundation
 import Observation
 import OSLog
@@ -116,11 +115,11 @@ public class DocumentationViewer {
             )
 
         guard currentTopic != topicUrl else {
-            logger.debug("DEBOUNDE: navigating to \(topicUrl.url)")
             return
         }
 
         defer { self.currentTopic = topicUrl }
+        
         guard let currentTopic, currentTopic.bundleIdentifier == topicUrl.bundleIdentifier else {
             logger.debug("attempt full page navigation to \(topicUrl.url)")
             coordinator?.view?.load(.init(url: topicUrl.url))
@@ -143,3 +142,4 @@ public class DocumentationViewer {
         closure(coordinator)
     }
 }
+
